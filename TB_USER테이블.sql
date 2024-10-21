@@ -27,3 +27,8 @@ SELECT * FROM TB_USER;
 COMMIT;
 
 --DROP TABLE TB_USER;
+
+UPDATE TB_USER SET
+user_name = '철수'
+WHERE USER_ID = 'user03'
+AND USER_PW = 'pass03';
