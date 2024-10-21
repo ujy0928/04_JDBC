@@ -225,14 +225,6 @@ public class UserView {
 		String userPw = sc.next();
 		
 
-
-		
-//		User user = new User();
-//		
-//		user.setUserId(userId);
-//		user.setUserPw(userPw);
-//		user.setUserName(userName);
-//		
 		int result = service.selectUser(userId, userPw);
 			
 		if(result == 0) {
