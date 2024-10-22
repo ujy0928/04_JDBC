@@ -134,11 +134,11 @@ public class UserService {
 	}
 
 
-	public int updateName(User user) throws Exception{
+	public int updateName(int userNo, String userName) throws Exception{
 		Connection conn = getConnection();
 		
 		
-		int result = dao.updateName(conn, user);
+		int result = dao.updateName(conn, userNo, userName);
 		
 		// 4. UPDATE 수행 결과에 따라 트랜잭션 제어 처리
 		if(result > 0) { // UPDATE 성공
@@ -155,20 +155,74 @@ public class UserService {
 
 	public int selectUser(String userId, String userPw) throws Exception{
 		Connection conn = getConnection();
+			
+		int userNo = dao.selectUser(conn, userId, userPw);
 		
+		close(conn);
 		
-		int result = dao.selectUser(conn, userId, userPw);
+		return userNo;
+	}
+
+
+	/** 아이디 중복 확인 서비스
+	 * @param userId
+	 * @return count
+	 */
+	public int idCheck(String userId) throws Exception {
 		
-		// 4. UPDATE 수행 결과에 따라 트랜잭션 제어 처리
-		if(result > 0) { // UPDATE 성공
+		Connection conn = getConnection();
+		
+		int count = dao.idCheck(conn, userId);
+		
+		close(conn);
+		
+		return count;
+	}
+
+
+	/** userList에 있는 모든 user INSERT 서비스
+	 * @param userList
+	 * @return result : 삽입된 행의 개수
+	 */
+	public int multiInsertUser(List<User> userList) throws Exception {
+		
+		Connection conn = getConnection();
+		
+		// 다중 INSERT 방법
+		// 1) SQL 을 이용한 다중 INSERT
+		// 2) Java 반복문을 이용한 다중 INSERT (이거 사용!)
+		
+		int count = 0; // 삽입 성공한 행의 개수 count
+		
+		// 1행씩 삽입
+		for(User user : userList) {
+			int result = dao.insertUser(conn, user);
+			count += result; // 삽입 성공한 행의 개수를 count에 누적
+		}
+		//count--; // 강제 실패
+		// 트랜잭션 제어 처리
+		// 전체 삽입 성공시 commit / 아니면 rollback(일부 삽입, 전체 실패)
+		if(count == userList.size()) {
 			commit(conn);
-		} else { // UPDATE 실패
+		} else {
 			rollback(conn);
 		}
 		
 		close(conn);
 		
-		return result;
+		return count;
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

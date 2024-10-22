@@ -194,10 +194,12 @@ public class UserDAO {
 				SELECT USER_NO, USER_ID, USER_PW, 
 				USER_NAME, TO_CHAR(ENROLL_DATE, 'YYYY"년" MM"월" DD"일"') ENROLL_DATE
 				FROM TB_USER
-				WHERE USER_NAME LIKE '%"""+input+"%' ORDER BY USER_NO ASC";
-		
+				WHERE USER_NAME LIKE '%'|| ? ||'%' 
+				ORDER BY USER_NO ASC
+				""";
 		try {
 			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, input);
 			
 			rs = pstmt.executeQuery();
 			
@@ -235,9 +237,11 @@ public class UserDAO {
 					SELECT USER_NO, USER_ID, USER_PW, 
 					USER_NAME, TO_CHAR(ENROLL_DATE, 'YYYY"년" MM"월" DD"일"') ENROLL_DATE
 					FROM TB_USER
-					WHERE USER_NO = """ + input;
+					WHERE USER_NO = ?
+					""";
 			
 			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, input);
 			
 			rs = pstmt.executeQuery();
 			
@@ -266,7 +270,8 @@ public class UserDAO {
 		try {
 			String sql = """
 					DELETE FROM TB_USER
-					WHERE USER_NO = ?""";
+					WHERE USER_NO = ?
+					""";
 			
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, input);
@@ -280,21 +285,19 @@ public class UserDAO {
 		return result;
 	}
 
-	public int updateName(Connection conn, User user) throws Exception {
+	public int updateName(Connection conn, int userNo, String userName) throws Exception {
 		int result = 0;
 		
 		try {
 			String sql = """
 					UPDATE TB_USER SET 
 					USER_NAME = ?
-					WHERE USER_ID = ?
-					AND USER_PW = ?
+					WHERE USER_NO = ?
 					""";
 			
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, user.getUserName());
-			pstmt.setString(2, user.getUserId());
-			pstmt.setString(3, user.getUserPw());
+			pstmt.setString(1, userName);
+			pstmt.setInt(2, userNo);
 			
 			result = pstmt.executeUpdate();
 			
@@ -306,12 +309,11 @@ public class UserDAO {
 	}
 
 	public int selectUser(Connection conn, String userId, String userPw) throws Exception{
-		int result = 0;
+		int userNo = 0;
 		
 		try {
 			String sql = """
-					SELECT USER_NO, USER_ID, USER_PW, 
-					USER_NAME, TO_CHAR(ENROLL_DATE, 'YYYY"년" MM"월" DD"일"') ENROLL_DATE
+					SELECT USER_NO
 					FROM TB_USER
 					WHERE USER_ID = ?
 					AND USER_PW = ?
@@ -321,13 +323,47 @@ public class UserDAO {
 			pstmt.setString(1, userId);
 			pstmt.setString(2, userPw);
 			
-			result = pstmt.executeUpdate();
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				userNo = rs.getInt("USER_NO");
+			}
 			
 		} finally {
+			close(rs);
 			close(pstmt);
 		}
 		
-		return result;
+		return userNo;
+	}
+
+	public int idCheck(Connection conn, String userId) throws Exception {
+		int count = 0; 
+		
+		try {
+			String sql = """
+					SELECT COUNT(*)
+					FROM TB_USER
+					WHERE USER_ID = ?
+					""";
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, userId);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				count = rs.getInt(1); // 조회된 컬럼 순서를 이용해
+										// 컬럼값 얻어오기
+			}
+			
+		} finally {
+			close(rs);
+			close(pstmt);
+		}
+		
+		
+		return count;
 	}
 
 }
