@@ -1,8 +1,10 @@
 package edu.kh.jdbc.service;
 
 // import static : 지정된 경로에 존재하는 static 구문을 모두 얻어와
+
 // 클래스명.메서드명() 이 아닌 메서드명() 만 작성해도 호출 가능하게 함
 import static edu.kh.jdbc.common.JDBCTemplate.close;
+
 import static edu.kh.jdbc.common.JDBCTemplate.commit;
 import static edu.kh.jdbc.common.JDBCTemplate.getConnection;
 import static edu.kh.jdbc.common.JDBCTemplate.rollback;
